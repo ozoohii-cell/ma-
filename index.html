@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>맥스콘 내부 관리 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <!-- 로그인 화면 -->
+    <div id="login-view" class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-center text-gray-900">맥스콘 시스템 로그인</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="email" class="sr-only">이메일</label>
+                    <input id="email" name="email" type="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500" placeholder="이메일 주소">
+                </div>
+                <div>
+                    <label for="password" class="sr-only">비밀번호</label>
+                    <input id="password" name="password" type="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500" placeholder="비밀번호">
+                </div>
+            </div>
+            <button id="login-btn" class="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">로그인</button>
+        </div>
+    </div>
+
+    <!-- 메인 앱 화면 (로그인 후) -->
+    <div id="app-view" class="hidden">
+        <header class="bg-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <h1 class="text-xl font-bold text-gray-800">Maxcon Admin</h1>
+                <div class="flex items-center space-x-4">
+                    <span id="user-info" class="text-gray-600"></span>
+                    <button id="logout-btn" class="px-3 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600">로그아웃</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="container mx-auto p-4">
+            <!-- 관리자/직원 대시보드 -->
+            <div id="dashboard-view" class="hidden">
+                <h2 class="text-2xl font-bold mb-4">대시보드</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <button onclick="switchView('work-order-create-view')" class="p-6 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600">작업지시서 등록</button>
+                    <button class="p-6 bg-green-500 text-white rounded-lg shadow hover:bg-green-600">재고 입력</button>
+                    <button class="p-6 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600">작업 조회</button>
+                    <button class="p-6 bg-indigo-500 text-white rounded-lg shadow hover:bg-indigo-600">상담 기록</button>
+                </div>
+                <!-- 공지사항, 작업현황 등 추가될 영역 -->
+            </div>
+
+            <!-- 작업지시서 작성 뷰 -->
+            <div id="work-order-create-view" class="hidden bg-white p-6 rounded-lg shadow-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">작업지시서 작성</h2>
+                    <button onclick="switchView('dashboard-view')" class="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300">뒤로</button>
+                </div>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="customer-name" class="block text-sm font-medium text-gray-700">고객 이름</label>
+                            <div class="flex">
+                                <input type="text" id="customer-name" class="mt-1 block w-full border border-gray-300 rounded-l-md p-2" placeholder="고객 검색...">
+                                <button id="add-customer-btn" class="px-4 py-2 bg-gray-700 text-white rounded-r-md hover:bg-gray-800">신규</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="vehicle-number" class="block text-sm font-medium text-gray-700">차량 번호</label>
+                            <div class="flex">
+                                <input type="text" id="vehicle-number" class="mt-1 block w-full border border-gray-300 rounded-l-md p-2" placeholder="차량번호 검색...">
+                                <button id="add-vehicle-btn" class="px-4 py-2 bg-gray-700 text-white rounded-r-md hover:bg-gray-800">신규</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">작업 항목</h3>
+                        <div class="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
+                            <!-- JS로 작업 카테고리 칩 추가될 영역 -->
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xl font-bold">총 금액: ₩ <span id="total-amount">0</span></span>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button id="save-work-order-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">저장하기</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 고객용 뷰 -->
+            <div id="customer-view" class="hidden bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4">작업 요청 등록</h2>
+                <!-- 고객용 작업 요청 폼 -->
+            </div>
+        </main>
+    </div>
+
+
+    <!-- ===================== 모달 창 영역 시작 ===================== -->
+    
+    <!-- 신규 고객 등록 모달 -->
+    <div id="add-customer-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+            <h3 class="text-xl font-bold mb-4">신규 고객 등록</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="new-customer-name" class="block text-sm">고객 이름</label>
+                    <input type="text" id="new-customer-name" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label for="new-customer-contact" class="block text-sm">연락처</label>
+                    <input type="text" id="new-customer-contact" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label for="new-customer-type" class="block text-sm">고객 구분</label>
+                    <!-- [수정됨] value 값을 DB ENUM 타입과 일치시킴 -->
+                    <select id="new-customer-type" class="w-full p-2 border rounded">
+                        <option value="individual">개인</option>
+                        <option value="used_car_master">중고차 카마스터</option>
+                        <option value="new_car_master">신차 카마스터</option>
+                        <option value="company">회사</option>
+                    </select>
+                </div>
+                <!-- 소속 회사 정보 섹션 -->
+                <div id="company-info-section" class="hidden space-y-2 border-t pt-4">
+                    <label class="block text-sm">소속 회사</label>
+                    <div class="flex">
+                        <input type="text" id="affiliated-company" class="w-full p-2 border rounded-l-md" placeholder="회사 검색...">
+                        <button id="add-company-btn" class="px-4 py-2 bg-gray-700 text-white rounded-r-md hover:bg-gray-800">신규</button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button class="close-modal-btn px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">취소</button>
+                <button id="save-customer-btn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">저장</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 신규 소속 회사 등록 모달 -->
+    <div id="add-company-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-2xl">
+            <h3 class="text-xl font-bold mb-4">신규 소속 회사 등록</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="new-company-name" class="block text-sm">회사명</label>
+                    <input type="text" id="new-company-name" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label for="new-company-business-number" class="block text-sm">사업자번호</label>
+                    <input type="text" id="new-company-business-number" class="w-full p-2 border rounded">
+                </div>
+                <div class="col-span-2">
+                    <label for="new-company-address" class="block text-sm">사업자주소</label>
+                    <input type="text" id="new-company-address" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label for="new-company-ceo" class="block text-sm">대표명</label>
+                    <input type="text" id="new-company-ceo" class="w-full p-2 border rounded">
+                </div>
+                 <div>
+                    <label for="new-company-corporate-number" class="block text-sm">법인번호</label>
+                    <input type="text" id="new-company-corporate-number" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label for="new-company-type" class="block text-sm">업태</label>
+                    <input type="text" id="new-company-type" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label for="new-company-item" class="block text-sm">종목</label>
+                    <input type="text" id="new-company-item" class="w-full p-2 border rounded">
+                </div>
+                <div class="col-span-2">
+                    <label for="new-company-email" class="block text-sm">이메일 주소</label>
+                    <input type="email" id="new-company-email" class="w-full p-2 border rounded">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button class="close-modal-btn px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">취소</button>
+                <button id="save-company-btn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 신규 차량 등록 모달 -->
+    <div id="add-vehicle-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+            <h3 class="text-xl font-bold mb-4">신규 차량 등록</h3>
+            <div class="space-y-4">
+                 <div>
+                    <label for="new-vehicle-number" class="block text-sm">차량번호</label>
+                    <input type="text" id="new-vehicle-number" class="w-full p-2 border rounded">
+                </div>
+                 <div>
+                    <label for="new-vehicle-vin" class="block text-sm">차대번호</label>
+                    <input type="text" id="new-vehicle-vin" class="w-full p-2 border rounded">
+                </div>
+                 <div class="relative">
+                    <label for="new-vehicle-model" class="block text-sm">차종</label>
+                    <input type="text" id="new-vehicle-model" class="w-full p-2 border rounded" placeholder="차종 검색..." autocomplete="off">
+                    <div id="car-model-autocomplete-results" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 shadow-lg hidden max-h-48 overflow-y-auto">
+                        <!-- 자동완성 결과가 여기에 표시됩니다. -->
+                    </div>
+                </div>                <div class="flex items-center">
+                    <input type="checkbox" id="new-car-coupon-checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                    <label for="new-car-coupon-checkbox" class="ml-2 block text-sm text-gray-900">신차쿠폰 사용</label>
+                </div>
+                <div id="coupon-upload-section" class="hidden space-y-2">
+                     <label for="coupon-upload" class="block text-sm">쿠폰 사진 업로드</label>
+                     <div class="flex">
+                        <input type="file" id="coupon-upload" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <button id="ocr-btn" class="px-3 py-1 bg-teal-500 text-white rounded-md text-sm">OCR</button>
+                     </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button class="close-modal-btn px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">취소</button>
+                <button id="save-vehicle-btn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 모달 창 영역 끝 ===================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+</html>
